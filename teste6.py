@@ -196,15 +196,6 @@ def update(checklist,start_date,end_date):
 
 
 
-    
-
-
-
-
-
-
-
-
 
 
 #callback tabs

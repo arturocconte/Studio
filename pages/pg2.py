@@ -11,7 +11,7 @@ import dash
 
 #app = Dash(__name__, external_stylesheets=external_stylesheets)
 #app.config['suppress_callback_exceptions'] = True
-dash.register_page(__name__, name='Atividade') # '/' is home page
+dash.register_page(__name__, name='PIB TESTE') # '/' is home page
 
 # page 1 data
 # pd.read_csv("bcdata.atividadebc.csv")
@@ -33,7 +33,7 @@ df4 = df4.set_index(['Data'])
 
 
 layout = html.Div([
-        html.H3('Índice de atividade'),
+        html.H3('PIB - SLIDER'),
         dcc.Graph(
             id='pib2'
             #figure=fig_atividade

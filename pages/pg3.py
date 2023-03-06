@@ -6,12 +6,13 @@ import plotly.graph_objects as go
 from datetime import datetime
 import dash_bootstrap_components as dbc
 import dash
+from plotly.subplots import make_subplots
 
 #external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 #app = Dash(__name__, external_stylesheets=external_stylesheets)
 #app.config['suppress_callback_exceptions'] = True
-dash.register_page(__name__, path='/', name='PIB') # '/' is home page
+dash.register_page(__name__, name='teste') # '/' is home page
 
 # page 1 data
 pd.read_csv("dados_pib.csv")
@@ -20,13 +21,14 @@ df4.columns = ["Data","pib_mensal","ipca","100","deflator","pib_real"]
 df4['Data'] = pd.to_datetime(df4['Data'],dayfirst=True)
 dff4 = df4.set_index(['Data'])
 
-checklist = dcc.Checklist(
-                    id='checklist',
+checklist2 = dcc.Checklist(
+                    id='checklist2',
                     options=[
                              {'label': 'PIB Mensal', 'value': 'pib_mensal'},
                              {'label': 'PIB Real', 'value': 'pib_real'},
+                             {'label': 'IPCA', 'value': 'ipca'}
                     ],
-                    value=['pib_mensal','pib_real'],
+                    value=['pib_mensal','pib_real','ipca'],
                     style={"width": "60%"}
                 )
 
@@ -35,35 +37,45 @@ checklist = dcc.Checklist(
 layout = html.Div([
         html.H3('PIB'),
         dcc.DatePickerRange(
-            id="date-picker2",
+            id="date-picker3",
             start_date=datetime(1990, 1, 1),
             end_date=datetime(2023, 1 ,1),
             display_format="DD/MM/YYYY",
             clearable=False,
             number_of_months_shown=1
         ),
-        dbc.Container([checklist]),
+        dbc.Container([checklist2]),
         dcc.Graph(
-            id='pib'),
+            id='pib3'),
         html.H6('Fonte: Banco Central do Brasil')
         ])
 
 
 
 @callback(
-    Output('pib', 'figure'),
-    [Input('checklist','value'),
-    Input('date-picker2', 'start_date'),
-    Input('date-picker2', 'end_date')]
+    Output('pib3', 'figure'),
+    [Input('checklist2','value'),
+    Input('date-picker3', 'start_date'),
+    Input('date-picker3', 'end_date')]
 )
-def update(checklist,start_date,end_date):
+def update(checklist2,start_date,end_date):
     dfff4 = dff4.loc[start_date: end_date]
-    fig4 = px.line(
-        dfff4, y=checklist, labels={
-        "Data": "Data",
-        "value": "Valor (milhões de reais)"
-        },
+    fig5 = make_subplots(specs=[[{"secondary_y": True}]])
+
+    fig5.add_trace(
+        go.Scatter(dfff4,x ='Data' ,y=checklist2,
+        name="yaxis data", mode='lines'), secondary_y=False
     )
-    fig4.update_layout(legend_title="PIB", margin=dict(t=20),transition_duration=500,
-                       template="plotly")
-    return fig4
+    fig5.add_trace(
+        go.Scatter(dfff4,x ='Data' , y='ipca', name="axis ipca"),
+        secondary_y=False,
+    )
+    # fig4 = px.line(
+    #     dfff4, y=checklist2, labels={
+    #     "Data": "Data",
+    #     "value": "Valor (milhões de reais)"
+    #     },
+    # )
+    fig5.update_layout(legend_title="PIB", margin=dict(t=20),transition_duration=500,
+                       template="seaborn")
+    return fig5
