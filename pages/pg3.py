@@ -12,23 +12,31 @@ from plotly.subplots import make_subplots
 
 #app = Dash(__name__, external_stylesheets=external_stylesheets)
 #app.config['suppress_callback_exceptions'] = True
-dash.register_page(__name__, name='teste') # '/' is home page
+dash.register_page(__name__, name='teste2') # '/' is home page
 
 # page 1 data
 pd.read_csv("dados_pib.csv")
-df4 = pd.read_csv("dados_pib.csv")
-df4.columns = ["Data","pib_mensal","ipca","100","deflator","pib_real"]
-df4['Data'] = pd.to_datetime(df4['Data'],dayfirst=True)
-dff4 = df4.set_index(['Data'])
+df5 = pd.read_csv("dados_pib.csv")
+df5.columns = ["Data","pib_mensal","ipca","100","deflator","pib_real"]
+df5['Data'] = pd.to_datetime(df5['Data'],dayfirst=True)
+dff5 = df5.set_index(['Data'])
 
 checklist2 = dcc.Checklist(
                     id='checklist2',
                     options=[
                              {'label': 'PIB Mensal', 'value': 'pib_mensal'},
                              {'label': 'PIB Real', 'value': 'pib_real'},
+                    ],
+                    value=['pib_mensal','pib_real'],
+                    style={"width": "60%"}
+                )
+
+checklist_ipca = dcc.Checklist(
+                    id='checklist_ipca',
+                    options=[
                              {'label': 'IPCA', 'value': 'ipca'}
                     ],
-                    value=['pib_mensal','pib_real','ipca'],
+                    value=['ipca'],
                     style={"width": "60%"}
                 )
 
@@ -44,38 +52,48 @@ layout = html.Div([
             clearable=False,
             number_of_months_shown=1
         ),
-        dbc.Container([checklist2]),
+        dbc.Container([checklist2,checklist_ipca]),
         dcc.Graph(
-            id='pib3'),
+            id='pib4'),
         html.H6('Fonte: Banco Central do Brasil')
         ])
 
 
 
 @callback(
-    Output('pib3', 'figure'),
+    Output('pib4', 'figure'),
     [Input('checklist2','value'),
+     Input('checklist_ipca','value'),
     Input('date-picker3', 'start_date'),
     Input('date-picker3', 'end_date')]
 )
-def update(checklist2,start_date,end_date):
-    dfff4 = dff4.loc[start_date: end_date]
-    fig5 = make_subplots(specs=[[{"secondary_y": True}]])
+def update(checklist2,checklist_ipca,start_date,end_date):
+    dfff5 = dff5.loc[start_date: end_date]
+    subfig = make_subplots(specs=[[{"secondary_y": True}]])
+    
+    fig6 =  px.line(
+        dfff5, y=checklist2, labels={
+        "Data": "Data",
+        "value": "Valor (milhões de reais)"
+        },
+    )
 
-    fig5.add_trace(
-        go.Scatter(dfff4,x ='Data' ,y=checklist2,
-        name="yaxis data", mode='lines'), secondary_y=False
+    fig7 =  px.line(
+        dfff5, y=checklist_ipca, labels={
+        "Data": "Data",
+        "value": "Valor (milhões de reais)"
+        },
     )
-    fig5.add_trace(
-        go.Scatter(dfff4,x ='Data' , y='ipca', name="axis ipca"),
-        secondary_y=False,
-    )
-    # fig4 = px.line(
-    #     dfff4, y=checklist2, labels={
-    #     "Data": "Data",
-    #     "value": "Valor (milhões de reais)"
-    #     },
-    # )
-    fig5.update_layout(legend_title="PIB", margin=dict(t=20),transition_duration=500,
+    fig7.update_traces(yaxis="y2")
+
+
+    subfig.add_traces(fig6.data + fig7.data)
+    subfig.layout.xaxis.title="Data"
+    subfig.layout.yaxis.title="Valor (em milhões)"
+    subfig.layout.yaxis2.title="Índice"
+    subfig.for_each_trace(lambda t: t.update(line=dict(color=t.marker.color)))
+
+    subfig.update_layout(legend_title="PIB", margin=dict(t=20),
                        template="seaborn")
-    return fig5
+
+    return subfig
