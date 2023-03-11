@@ -12,7 +12,7 @@ from plotly.subplots import make_subplots
 
 #app = Dash(__name__, external_stylesheets=external_stylesheets)
 #app.config['suppress_callback_exceptions'] = True
-dash.register_page(__name__, name='teste2') # '/' is home page
+dash.register_page(__name__, name='PIB-IPCA') # '/' is home page
 
 # page 1 data
 pd.read_csv("dados_pib.csv")
@@ -94,6 +94,6 @@ def update(checklist2,checklist_ipca,start_date,end_date):
     subfig.for_each_trace(lambda t: t.update(line=dict(color=t.marker.color)))
 
     subfig.update_layout(legend_title="PIB", margin=dict(t=20),
-                       template="seaborn")
+                       template="plotly")
 
     return subfig
