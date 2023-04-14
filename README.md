@@ -1,6 +1,6 @@
 ## Studio
 
-Application to display economics data in python
+Application to display economics data in Python using Dashapp
 
 ## Pre-requisites
 
